@@ -86,9 +86,9 @@ Available methods:
   
   
 * `BufferInterface:Seek( pos )`\
-<font color="red">This is not supported when used with net library.</font>
+  This is not supported when used with net library.\
 * `BufferInterface:Tell( )`\
-<font color="red">This is not supported when used with net library.</font>\
+  This is not supported when used with net library.\
   returns: `number pos`
   
   
@@ -99,7 +99,7 @@ Available methods:
 
 Buffer written in Lua, which stores individual bytes as number values inside table. Can be used to write binary data, which then could be sent over http.
 
-The library returns a function. When function is called, it will create and return new `Stream` object. 
+The library returns a function. When function is called, it will create and return new `Stream` object. The data is stored in little-endian, unless true is passed as argument, which then it will store in big-endian.
 ```lua
 local Stream = include("stream.lua")
 local stream = Stream( )
