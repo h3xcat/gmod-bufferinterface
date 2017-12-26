@@ -26,372 +26,340 @@ local string_find = string.find
 local string_sub = string.sub
 local string_lower = string.lower
 --------------------------------------------------------------------------------
-BUFFER_INTERFACE_NET = 1
-BUFFER_INTERFACE_FILE = 2
-BUFFER_INTERFACE_STREAM = 3
+--------------------------------------------------------------------------------
+-- Net Library Buffer
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+local BufferInterfaceNet = {}
+BufferInterfaceNet.__index = BufferInterfaceNet
+--------------------------------------------------------------------------------
+-- Double
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteDouble( double )
+    net_WriteDouble( double )
+end
 
-local BufferInterface = {}
-BufferInterface.__index = BufferInterface
+function BufferInterfaceNet:ReadDouble()
+    return net_ReadDouble()
+end
+--------------------------------------------------------------------------------
+-- Float
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteFloat( float )
+    net_WriteFloat( float )
+end
 
-setmetatable(BufferInterface, {
-    __call = function(class, ...) return class.new(...) end
-})
+function BufferInterfaceNet:ReadFloat()
+    return net_ReadFloat()
+end
+--------------------------------------------------------------------------------
+-- Int32
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteInt32( int32 )
+    net_WriteInt( int32, 32 )
+end
 
-function BufferInterface.new( obj, offset )
-    local self = setmetatable({}, BufferInterface)
+function BufferInterfaceNet:ReadInt32()
+    return net_ReadInt( 32 )
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteUInt32( int32 )
+    net_WriteUInt( int32, 32 )
+end
+
+function BufferInterfaceNet:ReadUInt32()
+    return net_ReadUInt( 32 )
+end
+--------------------------------------------------------------------------------
+-- Int16
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteInt16( int16 )
+    net_WriteInt( int16, 16 )
+end
+
+function BufferInterfaceNet:ReadInt16()
+    return net_ReadInt( 16 )
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteUInt16( int16 )
+    net_WriteUInt( int16, 16 )
+end
+
+function BufferInterfaceNet:ReadUInt16()
+    return net_ReadUInt( 16 )
+end
+--------------------------------------------------------------------------------
+-- Int8
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteInt8( int8 )
+    net_WriteInt( int8, 8 )
+end
+
+function BufferInterfaceNet:ReadInt8( )
+    return net_ReadInt( 8 )
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteUInt8( int8 )
+    net_WriteUInt( int8, 8 )
+end
+
+function BufferInterfaceNet:ReadUInt8()
+    return net_ReadUInt( 8 )
+end
+--------------------------------------------------------------------------------
+-- Bool
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteBool( bool )
+    net_WriteBool( bool )
+end
+
+function BufferInterfaceNet:ReadBool()
+    return net_ReadBool( )
+end
+--------------------------------------------------------------------------------
+-- Vector
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteVector( vector )
+    net_WriteVector( vector )
+end
+
+function BufferInterfaceNet:ReadVector()
+    return net_ReadVector( )
+end
+--------------------------------------------------------------------------------
+-- String
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteString( str )
+    net_WriteString( str )
+end
+
+function BufferInterfaceNet:ReadString()
+    return net_ReadString( )
+end
+--------------------------------------------------------------------------------
+-- Data
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:WriteData( data, len )
+    len = len or #data
+    net_WriteData( data, len )
+end
+
+function BufferInterfaceNet:ReadData( len )
+    return net_ReadData( len )
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceNet:Seek( pos )
+    error( "Seek() is not supported by net library." )
+end
+
+function BufferInterfaceNet:Tell( )
+    error( "Tell() is not supported by net library." )
+end
+
+function BufferInterfaceNet:Size( )
+    return net_BytesWritten( )
+end
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- File Buffer
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+local BufferInterfaceFile = {}
+BufferInterfaceFile.__index = BufferInterfaceFile
+--------------------------------------------------------------------------------
+-- Double
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteDouble( double )
+    self.buffer_obj:WriteDouble( double )
+end
+
+function BufferInterfaceFile:ReadDouble()
+    return self.buffer_obj:ReadDouble()
+end
+--------------------------------------------------------------------------------
+-- Float
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteFloat( float )
+    self.buffer_obj:WriteFloat( float )
+end
+
+function BufferInterfaceFile:ReadFloat()
+    return self.buffer_obj:ReadFloat()
+end
+--------------------------------------------------------------------------------
+-- Int32
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteInt32( int32 )
+    self.buffer_obj:WriteLong( int32 )
+end
+
+function BufferInterfaceFile:ReadInt32()
+    return self.buffer_obj:ReadLong()
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteUInt32( int32 )
+    if int32 >= 0x80000000 then
+        int32 = int32 - 0x100000000
+    end
+    self.buffer_obj:WriteLong( int32 )
+end
+
+function BufferInterfaceFile:ReadUInt32()
+    local int32 = self.buffer_obj:ReadLong()
+    if int32 < 0 then
+        int32 = int32 + 0x100000000
+    end
+    return int32
+end
+--------------------------------------------------------------------------------
+-- Int16
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteInt16( int16 )
+    self.buffer_obj:WriteShort( int16 )
+end
+
+function BufferInterfaceFile:ReadInt16()
+    return self.buffer_obj:ReadShort( )
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteUInt16( int16 )
+    if int16 >= 0x8000 then
+        int16 = int16 - 0x10000
+    end
+    self.buffer_obj:WriteShort( int16 )
+end
+
+function BufferInterfaceFile:ReadUInt16()
+    local int16 = self.buffer_obj:ReadShort()
+    if int16 < 0 then
+        int16 = int16 + 0x10000
+    end
+    return int16
+end
+--------------------------------------------------------------------------------
+-- Int8
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteInt8( int8 )
+    if int8 >= 0x80 then
+        int8 = int8 - 0x100
+    end
+    self.buffer_obj:WriteByte( int8 )
+end
+
+function BufferInterfaceFile:ReadInt8( )
+    local int8 = self.buffer_obj:ReadByte()
+    if int8 < 0 then
+        int = int8 + 0x100
+    end
+    return int8
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteUInt8( int8 )
+    self.buffer_obj:WriteByte( int8 )
+end
+
+function BufferInterfaceFile:ReadUInt8()
+    return self.buffer_obj:ReadByte( )
+end
+--------------------------------------------------------------------------------
+-- Bool
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteBool( bool )
+    self.buffer_obj:WriteBool( bool )
+end
+
+function BufferInterfaceFile:ReadBool()
+    return self.buffer_obj:ReadBool( )
+end
+--------------------------------------------------------------------------------
+-- Vector
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteVector( vector )
+    self.buffer_obj:WriteFloat( vector.x )
+    self.buffer_obj:WriteFloat( vector.y )
+    self.buffer_obj:WriteFloat( vector.z )
+end
+
+function BufferInterfaceFile:ReadVector()
+    return Vector( self.buffer_obj:ReadFloat( ), self.buffer_obj:ReadFloat( ), self.buffer_obj:ReadFloat( ) )
+end
+--------------------------------------------------------------------------------
+-- String
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteString( str )
+    local len = string_find( str, "\0" )
+    if len then
+        self.buffer_obj:Write( string_sub(str, 1, len) )
+    else
+        self.buffer_obj:Write( str )
+        self.buffer_obj:Write( "\0" )
+    end
+end
+
+function BufferInterfaceFile:ReadString()
+    local str_t = {}
+
+    local fl = self.buffer_obj
+    for i = 1, 7999 do
+        local b = fl:ReadByte()
+        if b == 0 or b == nil then
+            break
+        end
+        str_t[i] = b
+    end
+
+    return string_char( unpack(str_t) )
+end
+--------------------------------------------------------------------------------
+-- Data
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:WriteData( data, len )
+    local data_len = #data
+    len = len or data_len
+    local fl = self.buffer_obj
+    
+    if data_len == len then
+        fl:Write( data )
+    elseif data_len < len then
+        fl:Write( string_sub( data, 1, len ) )
+    else
+        fl:Write( data )
+        fl:Seek(fl:Tell()+(len-data_len))
+    end
+end
+
+function BufferInterfaceFile:ReadData( len )
+    return self.buffer_obj:Read( len ) or ""
+end
+--------------------------------------------------------------------------------
+function BufferInterfaceFile:Seek( pos )
+    self.buffer_obj:Seek( pos )
+end
+
+function BufferInterfaceFile:Tell( )
+    return self.buffer_obj:Tell( )
+end
+
+function BufferInterfaceFile:Size( )
+    return self.buffer_obj:Size( )
+end
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+local function BufferInterface( obj, offset )
+    local self = { BufferObj=true }
 
     if isstring(obj) and string_lower(obj) == "net" then
-        self.buffer_type = BUFFER_INTERFACE_NET
+        setmetatable(self, BufferInterfaceNet)
+        self.buffer_type = "net"
     elseif type(obj) == "File" then
-        self.buffer_type = BUFFER_INTERFACE_FILE
-        self.buffer_obj = obj
-    elseif istable( obj ) and obj.StreamObj then
-        self.buffer_type = BUFFER_INTERFACE_STREAM
+        setmetatable(self, BufferInterfaceFile)
+        self.buffer_type = "file"
         self.buffer_obj = obj
     else
-        return
+        return nil
     end
 
     return self
 end
 
---------------------------------------------------------------------------------
--- Double
---------------------------------------------------------------------------------
-function BufferInterface:WriteDouble( double )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteDouble( double )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        self.buffer_obj:WriteDouble( double )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        self.buffer_obj:WriteDouble( double )
-    end
-end
-
-function BufferInterface:ReadDouble()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadDouble()
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:ReadDouble()
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:ReadDouble()
-    end
-end
---------------------------------------------------------------------------------
--- Float
---------------------------------------------------------------------------------
-function BufferInterface:WriteFloat( float )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteFloat( float )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        self.buffer_obj:WriteFloat( float )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        self.buffer_obj:WriteFloat( float )
-    end
-end
-
-function BufferInterface:ReadFloat()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadFloat()
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:ReadFloat()
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:ReadFloat()
-    end
-end
---------------------------------------------------------------------------------
--- Int32
---------------------------------------------------------------------------------
-function BufferInterface:WriteInt32( int32 )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteInt( int32, 32 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        self.buffer_obj:WriteLong( int32 )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteInt32( int32 )
-    end
-end
-
-function BufferInterface:ReadInt32()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadInt( 32 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:ReadLong()
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadInt32( )
-    end
-end
---------------------------------------------------------------------------------
-function BufferInterface:WriteUInt32( int32 )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteUInt( int32, 32 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        if int32 >= 0x80000000 then
-            int32 = int32 - 0x100000000
-        end
-        self.buffer_obj:WriteLong( int32 )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteUInt32( int32 )
-    end
-end
-
-function BufferInterface:ReadUInt32()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadUInt( 32 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        local int32 = self.buffer_obj:ReadLong()
-        if int32 < 0 then
-            int32 = int32 + 0x100000000
-        end
-        return int32
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadUInt32( )
-    end
-end
---------------------------------------------------------------------------------
--- Int16
---------------------------------------------------------------------------------
-function BufferInterface:WriteInt16( int16 )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteInt( int16, 16 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        self.buffer_obj:WriteShort( int16 )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteInt16( int16 )
-    end
-end
-
-function BufferInterface:ReadInt16()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadInt( 16 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        return self.buffer_obj:ReadShort( )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadInt16( )
-    end
-end
---------------------------------------------------------------------------------
-function BufferInterface:WriteUInt16( int16 )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteUInt( int16, 16 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        if int16 >= 0x8000 then
-            int16 = int16 - 0x10000
-        end
-        self.buffer_obj:WriteShort( int16 )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteUInt16( int16 )
-    end
-end
-
-function BufferInterface:ReadUInt16()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadUInt( 16 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        local int16 = self.buffer_obj:ReadShort()
-        if int16 < 0 then
-            int16 = int16 + 0x10000
-        end
-        return int16
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadUInt16( )
-    end
-end
---------------------------------------------------------------------------------
--- Int8
---------------------------------------------------------------------------------
-function BufferInterface:WriteInt8( int8 )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteInt( int8, 8 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        if int8 >= 0x80 then
-            int8 = int8 - 0x100
-        end
-        self.buffer_obj:WriteByte( int8 )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteInt8( int8 )
-    end
-end
-
-function BufferInterface:ReadInt8( )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadInt( 8 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        local int8 = self.buffer_obj:ReadByte()
-        if int8 < 0 then
-            int = int8 + 0x100
-        end
-        return int8
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:ReadInt8( )
-    end
-end
---------------------------------------------------------------------------------
-function BufferInterface:WriteUInt8( int8 )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteUInt( int8, 8 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        self.buffer_obj:WriteByte( int8 )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteUInt8( int8 )
-    end
-end
-
-function BufferInterface:ReadUInt8()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadUInt( 8 )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:ReadByte( )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadUInt8( )
-    end
-end
---------------------------------------------------------------------------------
--- Bool
---------------------------------------------------------------------------------
-function BufferInterface:WriteBool( bool )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteBool( bool )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        self.buffer_obj:WriteBool( bool )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        self.buffer_obj:WriteBool( bool )
-    end
-end
-
-function BufferInterface:ReadBool()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadBool( )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        return self.buffer_obj:ReadBool( )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadBool( )
-    end
-end
---------------------------------------------------------------------------------
--- Vector
---------------------------------------------------------------------------------
-function BufferInterface:WriteVector( vector )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteVector( vector )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        self.buffer_obj:WriteFloat( vector.x )
-        self.buffer_obj:WriteFloat( vector.y )
-        self.buffer_obj:WriteFloat( vector.z )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        self.buffer_obj:WriteVector( vector )
-    end
-end
-
-function BufferInterface:ReadVector()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadVector( )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then 
-        return Vector( self.buffer_obj:ReadFloat( ), self.buffer_obj:ReadFloat( ), self.buffer_obj:ReadFloat( ) )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then 
-        return self.buffer_obj:ReadVector( )
-    end
-end
---------------------------------------------------------------------------------
--- String
---------------------------------------------------------------------------------
-function BufferInterface:WriteString( str )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteString( str )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        local len = string_find( str, "\0" )
-        if len then
-            self.buffer_obj:Write( string_sub(str, 1, len) )
-        else
-            self.buffer_obj:Write( str )
-            self.buffer_obj:Write( "\0" )
-        end
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        self.buffer_obj:WriteString( str )
-    end
-end
-
-function BufferInterface:ReadString()
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadString( )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        local str_t = {}
-
-        local fl = self.buffer_obj
-        for i = 1, 7999 do
-            local b = fl:ReadByte()
-            if b == 0 or b == nil then
-                break
-            end
-            str_t[i] = b
-        end
-
-        return string_char( unpack(str_t) )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:ReadString()
-    end
-end
---------------------------------------------------------------------------------
--- Data
---------------------------------------------------------------------------------
-function BufferInterface:WriteData( data, len )
-    local data_len = #data
-    len = len or data_len
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        net_WriteData( data, len )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        local fl = self.buffer_obj
-        if data_len == len then
-            fl:Write( data )
-        elseif data_len < len then
-            fl:Write( string_sub( data, 1, len ) )
-        else
-            fl:Write( data )
-            fl:Seek(fl:Tell()+(len-data_len))
-        end
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        self.buffer_obj:WriteData( data, len )
-    end
-end
-
-function BufferInterface:ReadData( len )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_ReadData( len )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:Read( len ) or ""
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:ReadData( len )
-    end
-end
---------------------------------------------------------------------------------
-function BufferInterface:Seek( pos )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        error( "Seek() is not supported by net library." )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        self.buffer_obj:Seek( pos )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        self.buffer_obj:Seek( pos )
-    end
-end
-
-function BufferInterface:Tell( )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        error( "Tell() is not supported by net library." )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:Tell( )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:Tell( )
-    end
-end
-
-function BufferInterface:Size( )
-    if self.buffer_type == BUFFER_INTERFACE_NET then
-        return net_BytesWritten( )
-    elseif self.buffer_type == BUFFER_INTERFACE_FILE then
-        return self.buffer_obj:Size( )
-    elseif self.buffer_type == BUFFER_INTERFACE_STREAM then
-        return self.buffer_obj:Size( )
-    end
-end
---------------------------------------------------------------------------------
-return BufferInterface
+return BufferInterface, BufferInterfaceNet, BufferInterfaceFile

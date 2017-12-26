@@ -160,19 +160,6 @@ end
 --------------------------------------------------------------------------------
 local Stream = {}
 Stream.__index = Stream
-
-setmetatable( Stream, {
-    __call = function(class, ...) return class.new(...) end
-} )
-
-function Stream.new( big_endian )
-    local self = setmetatable({}, Stream)
-    self.StreamObj = true
-    self.buffer = {}
-    self.pointer = 1
-    self.big_endian = big_endian
-    return self
-end
 --------------------------------------------------------------------------------
 -- Double
 --------------------------------------------------------------------------------
@@ -441,4 +428,19 @@ function Stream:ToBase64( )
     return Base64Encode( self:ToRawString() )
 end
 --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+setmetatable( Stream, {
+    __call = function(class, ...) return class.new(...) end
+} )
+
+function Stream.new( big_endian )
+    local self = setmetatable({}, Stream)
+    self.StreamObj = true
+    self.BufferObj = true
+    self.buffer = {}
+    self.pointer = 1
+    self.big_endian = big_endian
+    return self
+end
+
 return Stream

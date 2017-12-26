@@ -7,12 +7,11 @@ This repository includes 2 seperate libraries for GLua:
 
 ## BufferInterface
 
-A wrapper for various buffer objects which includes File, Net, and Stream. The purpose behind this library is to unify different buffers under single buffer type, which then can be passed as function argument to some buffer reader or writer. In addition, it can be used for writing and reading unsigned integers and null terminated strings in binary files, which original File object lacks  such methods.
+A wrapper for Net and File buffers. The purpose behind this library is to unify different buffers under single buffer type, which then can be passed as function argument to some buffer reader or writer. In addition, it can be used for writing and reading unsigned integers and null terminated strings in binary files, which original File object lacks such methods.
 
 Supported buffers:
 * [Net](http://wiki.garrysmod.com/page/Category:net) (pass `"net"` as argument)
 * [File](http://wiki.garrysmod.com/page/Category:File)
-* Stream
 
 The library returns a function. When some buffer is passed as argument to the function, it will create new `BufferInterface` object.
 ```lua
@@ -97,9 +96,9 @@ Available methods:
 
 ## Stream
 
-Buffer written in Lua, which stores individual bytes as number values inside table. Can be used to write binary data, which then could be sent over http.
+Buffer written in Lua, which stores individual bytes as number values inside table. Method names are exactly the same as `BufferInterface`, therefore it doesn't need to be wrapped. Can be used to write binary data, which then could be sent over http.
 
-The library returns a function. When function is called, it will create and return new `Stream` object. The data is stored in little-endian, unless true is passed as argument, which then it will store in big-endian.
+The library returns a callable table (acts as function). When its called, it will create and return new `Stream` object. The data is stored in little-endian, unless true is passed as argument, which then it will store in big-endian.
 ```lua
 local Stream = include("stream.lua")
 local stream = Stream( )
@@ -231,8 +230,7 @@ SomeBufferWriter( buf_fl )
 fl:Close()
 
 -- Stream writing
-local stream = Stream()
-local buf_stream = BufferInterface( stream )
+local buf_stream = Stream()
 SomeBufferWriter( buf_stream )
 
 --------------------------------------------------------------------------------
