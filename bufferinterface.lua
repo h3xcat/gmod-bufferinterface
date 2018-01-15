@@ -240,16 +240,16 @@ end
 -- Int8
 --------------------------------------------------------------------------------
 function BufferInterfaceFile:WriteInt8( int8 )
-    if int8 >= 0x80 then
-        int8 = int8 - 0x100
+    if int8 < 0 then
+        int8 = int8 + 0x100
     end
-    self.buffer_obj:WriteByte( int8 )
+    self:WriteUInt8( int8 )
 end
 
 function BufferInterfaceFile:ReadInt8( )
-    local int8 = self.buffer_obj:ReadByte()
-    if int8 < 0 then
-        int = int8 + 0x100
+    local int8 = self:ReadUInt8()
+    if int8 >= 0x80 then
+        int8 = int8 - 0x100
     end
     return int8
 end
