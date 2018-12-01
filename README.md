@@ -1,9 +1,4 @@
-# gmod-bufferinterface-stream
-
-This repository includes 2 seperate libraries for GLua:
-* BufferInterface
-* Stream
-
+# bufferinterface-gmod
 
 ## BufferInterface
 
